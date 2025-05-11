@@ -10,7 +10,7 @@ from foodgram.constants import (
     MIN_AMOUNT,
     MAX_AMOUNT,
 )
-from tags.models import Tag
+
 from recipes.models import Recipe, RecipeIngredient, ShoppingCart, Favorite
 from ingredients.models import Ingredient
 from users.models import User, Subscription
@@ -21,11 +21,6 @@ class IngredientSerializer(serializers.ModelSerializer):
         model = Ingredient
         fields = ["id", "name", "measurement_unit"]
 
-
-class TagSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = ["id", "name", "slug"]
 
 
 class FavoriteRecipeSerializer(serializers.ModelSerializer):
@@ -281,9 +276,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
-    tags = serializers.PrimaryKeyRelatedField(
-        queryset=Tag.objects.all(), many=True, write_only=True
-    )
+
     ingredients = RecipeIngredientSerializer(
         many=True, source="recipe_ingredients"
     )
@@ -311,7 +304,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = [
             "id",
-            "tags",
             "author",
             "ingredients",
             "name",
@@ -323,7 +315,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, data):
-        tags = data.get("tags", [])
         ingredients = data.get("recipe_ingredients", [])
         image = data.get("image")
         cooking_time = data.get("cooking_time")
@@ -334,15 +325,6 @@ class RecipeSerializer(serializers.ModelSerializer):
                 {"image": "Изображение нельзя оставить пустым"}
             )
 
-        if not tags:
-            raise serializers.ValidationError(
-                {"tags": "Поле Тег не может быть пустым."}
-            )
-        tag_ids = [tag.id for tag in tags]
-        if len(tag_ids) != len(set(tag_ids)):
-            raise serializers.ValidationError(
-                {"tags": "Дублирование не применимо."}
-            )
 
         if not ingredients:
             raise serializers.ValidationError(
@@ -419,11 +401,9 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         ingredients_data = validated_data.pop("recipe_ingredients", [])
-        tags_data = validated_data.pop("tags", [])
         author = self.context["request"].user
 
         recipe = Recipe.objects.create(author=author, **validated_data)
-        recipe.tags.set(tags_data)
 
         self._create_or_update_ingredients(recipe, ingredients_data)
         return recipe
@@ -433,13 +413,11 @@ class RecipeSerializer(serializers.ModelSerializer):
             validated_data['image'] = instance.image
 
         ingredients_data = validated_data.pop("recipe_ingredients", [])
-        tags_data = validated_data.pop("tags", [])
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
 
-        instance.tags.set(tags_data)
         instance.recipe_ingredients.all().delete()
 
         self._create_or_update_ingredients(instance, ingredients_data)
@@ -447,5 +425,4 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)
-        rep["tags"] = TagSerializer(instance.tags.all(), many=True).data
         return rep

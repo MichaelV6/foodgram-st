@@ -6,6 +6,7 @@ from django.core.files.storage import default_storage
 from django.db.models import Sum
 from django.http import FileResponse
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models.functions import Lower
 from docx import Document
 from hashids import Hashids
 from rest_framework import (
@@ -32,31 +33,23 @@ from api.serializers import (
     SetPasswordSerializer,
     ShoppingCartSerializer,
     SubscribeSerializer,
-    TagSerializer,
     UserDetailSerializer,
     UserRegistrationSerializer,
     UserSerializer,
 )
 from ingredients.models import Ingredient
 from recipes.models import Favorite, Recipe, RecipeIngredient, ShoppingCart
-from tags.models import Tag
 from users.models import Subscription, User
 
 hashids = Hashids(salt=settings.SECRET_KEY, min_length=6)
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Ingredient.objects.all()
+    queryset = Ingredient.objects.all().order_by(Lower('name'))
     serializer_class = IngredientSerializer
     pagination_class = None
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_class = IngredientFilter
-
-
-class TagViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Tag.objects.all()
-    serializer_class = TagSerializer
-    pagination_class = None
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -69,6 +62,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPagination
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_class = RecipeFilter
+
 
     @decorators.action(detail=True, methods=["get"], url_path="get-link")
     def link(self, request, *args, **kwargs):

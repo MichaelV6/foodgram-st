@@ -20,7 +20,6 @@ class RecipeAdmin(admin.ModelAdmin):
     list_filter = (
         "author",
         "name",
-        "tags",
     )
     readonly_fields = (
         "get_image_preview",

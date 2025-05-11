@@ -5,14 +5,12 @@ from api.views import (
     UserViewSet,
     LogoutView,
     ObtainAuthToken,
-    TagViewSet,
     IngredientViewSet,
     RecipeViewSet,
     ShoppingCartViewSet,
 )
 
 router = DefaultRouter()
-router.register("tags", TagViewSet)
 router.register("ingredients", IngredientViewSet)
 router.register("recipes", RecipeViewSet)
 router.register("shopping_cart", ShoppingCartViewSet, basename="shopping-cart")

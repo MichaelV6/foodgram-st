@@ -9,7 +9,6 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("tags", "0001_initial"),
         ("ingredients", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ("recipes", "0001_initial"),
@@ -64,13 +63,6 @@ class Migration(migrations.Migration):
                 through="recipes.RecipeIngredient",
                 to="ingredients.ingredient",
                 verbose_name="ингредиенты",
-            ),
-        ),
-        migrations.AddField(
-            model_name="recipe",
-            name="tags",
-            field=models.ManyToManyField(
-                related_name="recipes", to="tags.tag", verbose_name="теги"
             ),
         ),
         migrations.AddField(

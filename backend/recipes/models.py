@@ -6,7 +6,6 @@ from django.db import models
 from django.contrib.auth import get_user_model
 
 from ingredients.models import Ingredient
-from tags.models import Tag
 from foodgram.constants import (
     MAX_RECIPE_NAME,
     MIN_COOKING_TIME,
@@ -58,11 +57,6 @@ class Recipe(models.Model):
         through="RecipeIngredient",
         related_name="recipes_used_in",
         verbose_name="ингредиенты",
-    )
-    tags = models.ManyToManyField(
-        Tag,
-        related_name="recipes",
-        verbose_name="теги",
     )
 
     class Meta:

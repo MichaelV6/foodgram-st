@@ -9,8 +9,8 @@ export {
   hexToRgba,
   useForm,
   useFormWithValidation,
-  useTags,
   useRecipes,
   useRecipe,
+  useTags,
   useSubscriptions
 }

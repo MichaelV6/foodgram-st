@@ -8,9 +8,14 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config("DJANGO_SECRET_KEY")
 
-DEBUG = True
+DEBUG = config("DJANGO_DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = ['172.21.135.45', 'localhost', '127.0.0.1' ]
+ALLOWED_HOSTS = config(
+    "DJANGO_ALLOWED_HOSTS",
+    default="localhost",
+    cast=lambda v: [s.strip() for s in v.split(",")]
+)
+
 DATA_UPLOAD_MAX_MEMORY_SIZE = MEMORY_SIZE
 FILE_UPLOAD_MAX_MEMORY_SIZE = MEMORY_SIZE
 
@@ -21,15 +26,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     "rest_framework",
     "rest_framework.authtoken",
     "django_filters",
     "django_cleanup",
-
     "users.apps.UsersConfig",
     "ingredients.apps.IngredientsConfig",
-    "tags.apps.TagsConfig",
     "recipes.apps.RecipesConfig",
     "api.apps.ApiConfig",
 ]

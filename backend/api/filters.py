@@ -2,7 +2,6 @@ from django_filters import rest_framework as filters
 
 from recipes.models import Recipe
 from ingredients.models import Ingredient
-from tags.models import Tag
 
 
 class IngredientFilter(filters.FilterSet):
@@ -15,23 +14,16 @@ class IngredientFilter(filters.FilterSet):
 
 class RecipeFilter(filters.FilterSet):
     is_in_shopping_cart = filters.BooleanFilter(
-        method="filter_is_in_shopping_cart"
+        method='filter_is_in_shopping_cart'
     )
-    is_favorited = filters.BooleanFilter(method="filter_is_favorited")
-    tags = filters.ModelMultipleChoiceFilter(
-        field_name="tags__slug",
-        to_field_name="slug",
-        queryset=Tag.objects.all(),
-        conjoined=False,
-    )
+    is_favorited = filters.BooleanFilter(method='filter_is_favorited')
 
     class Meta:
         model = Recipe
         fields = (
-            "tags",
-            "author",
-            "is_in_shopping_cart",
-            "is_favorited",
+            'author',
+            'is_in_shopping_cart',
+            'is_favorited',
         )
 
     def filter_is_in_shopping_cart(self, queryset, name, value):
