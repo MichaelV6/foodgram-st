@@ -77,10 +77,10 @@ CSRF_TRUSTED_ORIGINS = config(
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": config("DB_NAME", default="foodgram"),
-        "USER": config("DB_USER", default="postgres"),
-        "PASSWORD": config("DB_PASSWORD", default="db_password"),
-        "HOST": config("DB_HOST", default="localhost"),
+        "NAME": config("POSTGRES_DB"),
+        "USER": config("POSTGRES_USER"),
+        "PASSWORD": config("POSTGRES_PASSWORD"),
+        "HOST": config("DB_HOST", "db"),
         "PORT": config("DB_PORT", default=5432, cast=int),
     },
 }
@@ -137,8 +137,5 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "collected_static"
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
