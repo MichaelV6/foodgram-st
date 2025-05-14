@@ -65,6 +65,8 @@ services:
       - ../docs:/usr/share/nginx/html/api/docs
 
       - static_volume:/var/html/static
+      
+      - ../frontend/build/static:/var/html/static
 
       - media_volume:/var/html/media
 
