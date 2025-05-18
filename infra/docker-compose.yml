@@ -25,7 +25,7 @@ services:
     env_file:
       - ../backend/.env
     volumes:
-
+    - ../backend/:/app/
       - static_volume:/app/collected_static
       - media_volume:/app/media
     depends_on:
@@ -34,6 +34,7 @@ services:
     command: >
       /bin/sh -c "
         python manage.py migrate &&
+        python manage.py loaddata fixtures/initial_data.json &&
         python manage.py collectstatic --noinput &&
         gunicorn foodgram.wsgi:application --bind 0.0.0.0:8000
       "
@@ -65,10 +66,11 @@ services:
       - ../docs:/usr/share/nginx/html/api/docs
 
       - static_volume:/var/html/static
-      
-      - ../frontend/build/static:/var/html/static
+
+      - ../frontend/build/static/media:/var/html/static/media:ro
 
       - media_volume:/var/html/media
+
 
 volumes:
   pg_data:
