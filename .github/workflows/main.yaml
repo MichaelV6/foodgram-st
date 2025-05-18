@@ -1,0 +1,110 @@
+name: Foodgram CI/CD
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER:     ${{ secrets.DB_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          POSTGRES_DB:       ${{ secrets.DB_NAME }}
+        ports: [ '5432:5432' ]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: pip
+
+      - name: Install backend dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Run Django tests
+        env:
+          POSTGRES_USER:     ${{ secrets.DB_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          POSTGRES_DB:       ${{ secrets.DB_NAME }}
+          DB_HOST:           localhost
+          DB_PORT:           5432
+          DJANGO_SECRET_KEY: dummy
+        run: |
+          cd backend
+          python manage.py test
+
+  build_push_backend:
+    runs-on: ubuntu-latest
+    needs: tests
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Docker Buildx setup
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build & Push backend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend/
+          push:    true
+          tags:    volobuevm/foodgram_backend:latest
+
+  build_push_frontend:
+    runs-on: ubuntu-latest
+    needs: tests
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build & Push frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend/
+          push:    true
+          tags:    volobuevm/foodgram_frontend:latest
+
+  build_push_gateway:
+    runs-on: ubuntu-latest
+    needs: tests
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build & Push gateway
+        uses: docker/build-push-action@v5
+        with:
+          context: ./infra/
+          push:    true
+          tags:    volobuevm/foodgram_gateway:latest
