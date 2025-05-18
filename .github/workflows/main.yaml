@@ -105,6 +105,7 @@ jobs:
       - name: Build & Push gateway
         uses: docker/build-push-action@v5
         with:
-          context: ./infra/
-          push:    true
-          tags:    volobuevm/foodgram_gateway:latest
+          context: .
+          file: infra/Dockerfile
+          push: true
+          tags: volobuevm/foodgram_gateway:latest
