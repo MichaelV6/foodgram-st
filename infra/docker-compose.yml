@@ -34,7 +34,7 @@ services:
     command: >
       /bin/sh -c "
         python manage.py migrate &&
-        python manage.py loaddata fixtures/initial_data.json &&
+        python manage.py load_ingredients_from_json &&
         python manage.py collectstatic --noinput &&
         gunicorn foodgram.wsgi:application --bind 0.0.0.0:8000
       "
@@ -50,26 +50,18 @@ services:
       - ../frontend/build:/usr/share/nginx/html
 
   nginx:
-    container_name: foodgram_gateway
     image: nginx:1.25.4-alpine
-    depends_on:
-      backend:
-        condition: service_started
+    container_name: foodgram_gateway
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ../frontend/build:/usr/share/nginx/html
+      - ../docs:/usr/share/nginx/html/api/docs
+      - static_volume:/app/collected_static
+      - media_volume:/app/media
     ports:
       - "80:80"
-    volumes:
-
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
-
-      - ../frontend/build:/usr/share/nginx/html
-
-      - ../docs:/usr/share/nginx/html/api/docs
-
-      - static_volume:/var/html/static
-
-      - ../frontend/build/static/media:/var/html/static/media:ro
-
-      - media_volume:/var/html/media
+    depends_on:
+      - backend
 
 
 volumes:

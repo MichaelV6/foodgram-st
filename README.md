@@ -87,7 +87,7 @@ pip install -r backend/requirements.txt
 
 cd backend
 python manage.py migrate
-python manage.py loaddata fixtures/initial_data.json
+python manage.py load_ingredients_from_json
 
 
 python manage.py runserver
@@ -113,6 +113,20 @@ docker compose exec backend python manage.py migrate
 
 docker compose exec backend python manage.py createsuperuser
 ```
+
+Также предусмотрены предподготовленные данные для проверки с юзерами и рецептами.
+
+Для их загрузки следуйте указаниям:
+
+!!Примечание: перед созданием рецептов убедитесь, что база ингредиентов загружена.!!
+
+```bash
+cd infra
+
+
+docker compose exec backend python manage.py create_test_data
+```
+
 
 После запуска сервисы будут доступны по следующим адресам:
 

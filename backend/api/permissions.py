@@ -3,7 +3,7 @@ from rest_framework.permissions import (
     IsAuthenticated,
 )
 
-from users.models import User
+from recipes.models import User
 
 
 class IsAuthorOrReadOnly(IsAuthenticated):
@@ -11,4 +11,5 @@ class IsAuthorOrReadOnly(IsAuthenticated):
         return request.method in SAFE_METHODS or obj.author == request.user
 
     def has_permission(self, request, view):
+
         return request.method in SAFE_METHODS or isinstance(request.user, User)

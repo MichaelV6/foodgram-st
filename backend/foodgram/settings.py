@@ -28,13 +28,13 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework.authtoken",
+    "djoser",
     "django_filters",
     "django_cleanup",
-    "users.apps.UsersConfig",
-    "ingredients.apps.IngredientsConfig",
     "recipes.apps.RecipesConfig",
     "api.apps.ApiConfig",
 ]
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -46,7 +46,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-AUTH_USER_MODEL = "users.User"
+AUTH_USER_MODEL = "recipes.User"
 
 ROOT_URLCONF = "foodgram.urls"
 
@@ -85,6 +85,7 @@ DATABASES = {
     },
 }
 
+
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
 ]
@@ -111,7 +112,6 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS":
         "rest_framework.pagination.LimitOffsetPagination",
-    "PAGE_SIZE": PAGE_SIZE,
     "DEFAULT_FILTER_BACKENDS": (
         "django_filters.rest_framework.DjangoFilterBackend",
         "rest_framework.filters.OrderingFilter",
@@ -124,9 +124,22 @@ REST_FRAMEWORK = {
     ),
 }
 
+DJOSER = {
+    'LOGIN_FIELD': 'email',
+    'SERIALIZERS': {
+        'user_create': 'api.serializers.UserRegistrationSerializer',
+        'user': 'api.serializers.UserSerializer',
+        'current_user': 'api.serializers.UserSerializer',
+    },
+    'PERMISSIONS': {
+        'user': ['rest_framework.permissions.IsAuthenticated'],
+        'user_list': ['rest_framework.permissions.AllowAny'],
+    }
+}
+
 LANGUAGE_CODE = "ru-ru"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Europe/Moscow"
 
 USE_I18N = True
 
