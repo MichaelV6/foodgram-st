@@ -114,20 +114,6 @@ docker compose exec backend python manage.py migrate
 docker compose exec backend python manage.py createsuperuser
 ```
 
-Также предусмотрены предподготовленные данные для проверки с юзерами и рецептами.
-
-Для их загрузки следуйте указаниям:
-
-!!Примечание: перед созданием рецептов убедитесь, что база ингредиентов загружена.!!
-
-```bash
-cd infra
-
-
-docker compose exec backend python manage.py create_test_data
-```
-
-
 После запуска сервисы будут доступны по следующим адресам:
 
 * [http://localhost](http://localhost) — фронтенд веб-приложения
