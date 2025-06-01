@@ -1,5 +1,3 @@
-from functools import wraps
-
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 from django.db.models import Count, Prefetch
@@ -11,17 +9,9 @@ from recipes.models import (
     Ingredient, Recipe, RecipeIngredient,
     Favorite, ShoppingCart,
 )
-from .admin_custom import admin_site
 
 
-def mark_safe_method(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        return mark_safe(func(*args, **kwargs))
-    return wrapper
-
-
-@admin.register(Ingredient, site=admin_site)
+@admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
     list_display = ("name", "measurement_unit", "recipes_cnt")
     search_fields = ("name", "measurement_unit")
@@ -29,7 +19,7 @@ class IngredientAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).annotate(
-            recipes_cnt=Count("recipes_used_in")
+            recipes_cnt=Count("recipes")
         )
 
     @admin.display(description="В рецептах", ordering="recipes_cnt")
@@ -37,12 +27,12 @@ class IngredientAdmin(admin.ModelAdmin):
         return ingredient.recipes_cnt
 
 
-@admin.register(RecipeIngredient, site=admin_site)
+@admin.register(RecipeIngredient)
 class RecipeIngredientAdmin(admin.ModelAdmin):
     list_display = ("id", "recipe", "ingredient", "amount")
     list_select_related = ("recipe", "ingredient")
 
-@admin.register(Recipe, site=admin_site)
+@admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = (
         "id", "name", "cooking_time", "author",
@@ -56,7 +46,7 @@ class RecipeAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         return (
             super().get_queryset(request)
-            .annotate(fav_cnt=Count("favorited_by_users"))
+            .annotate(fav_cnt=Count("favorites"))
             .prefetch_related(
                 Prefetch(
                     "recipe_ingredients",
@@ -70,7 +60,7 @@ class RecipeAdmin(admin.ModelAdmin):
         return recipe.fav_cnt
 
     @admin.display(description="Продукты")
-    @mark_safe_method
+    @mark_safe
     def products_html(self, recipe):
         rows = (
             f"{ri.ingredient.name} — "
@@ -84,7 +74,7 @@ class RecipeAdmin(admin.ModelAdmin):
         return mark_safe(admin_thumbnail(recipe.image))
 
 
-@admin.register(Favorite, site=admin_site)
+@admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):
     list_display = ("id", "user", "recipe")
     list_filter = ("user", "recipe")
@@ -93,7 +83,7 @@ class FavoriteAdmin(admin.ModelAdmin):
     list_per_page = 20
 
 
-@admin.register(ShoppingCart, site=admin_site)
+@admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
     list_display = ("id", "user", "recipe")
     list_filter = ("user",)
@@ -101,7 +91,7 @@ class ShoppingCartAdmin(admin.ModelAdmin):
     list_select_related = ("user", "recipe")
 
 
-@admin.register(User, site=admin_site)
+@admin.register(User)
 class CustomUserAdmin(DjangoUserAdmin):
     list_display = (
         "id", "username", "full_name", "email",
@@ -155,7 +145,7 @@ class CustomUserAdmin(DjangoUserAdmin):
         return user.followers_cnt
 
 
-@admin.register(Subscription, site=admin_site)
+@admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
     list_display = ("user", "subscribed_to")
     list_select_related = ("user", "subscribed_to")

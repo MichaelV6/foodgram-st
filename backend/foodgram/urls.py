@@ -1,11 +1,12 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include
-from recipes.admin_custom import admin_site
+from django.contrib import admin
 
 urlpatterns = [
-    path('admin/', admin_site.urls),
+    path("admin/", admin.site.urls),
     path("api/", include("api.urls")),
+    path("", include("recipes.urls")),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

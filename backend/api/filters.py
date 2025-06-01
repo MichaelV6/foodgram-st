@@ -1,38 +1,35 @@
 from django_filters import rest_framework as filters
-
 from recipes.models import Recipe, Ingredient
 
 
 class IngredientFilter(filters.FilterSet):
-    name = filters.CharFilter(field_name="name", lookup_expr="istartswith")
+    name = filters.CharFilter(field_name='name', lookup_expr='istartswith')
 
     class Meta:
         model = Ingredient
-        fields = ("name",)
+        fields = ('name',)
 
 
 class RecipeFilter(filters.FilterSet):
-    is_in_shopping_cart = filters.BooleanFilter(
-        method='filter_is_in_shopping_cart'
-    )
-    is_favorited = filters.BooleanFilter(method='filter_is_favorited')
+    is_in_shopping_cart = filters.BooleanFilter(method='filter_in_cart')
+    is_favorited = filters.BooleanFilter(method='filter_favorited')
 
     class Meta:
         model = Recipe
-        fields = (
-            'author',
-            'is_in_shopping_cart',
-            'is_favorited',
-        )
+        fields = ('author', 'is_in_shopping_cart', 'is_favorited')
 
-    def filter_is_in_shopping_cart(self, recipes, name, value):
+    def filter_favorited(self, queryset, name, value):
         user = self.request.user
-        if value and not user.is_anonymous:
-            return recipes.filter(recipes_in_shopping_cart__user=user)
-        return recipes
+        if value:
+            if user.is_authenticated:
+                return queryset.filter(favorites__user=user)
+            return queryset.none()
+        return queryset
 
-    def filter_is_favorited(self, recipes, name, value):
+    def filter_in_cart(self, queryset, name, value):
         user = self.request.user
-        if value and not user.is_anonymous:
-            return recipes.filter(favorited_by_users__user=user)
-        return recipes
+        if value:
+            if user.is_authenticated:
+                return queryset.filter(recipes_in_shopping_cart__user=user)
+            return queryset.none()
+        return queryset
