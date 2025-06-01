@@ -58,7 +58,7 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = ["id", "name", "measurement_unit"]
 
 
-# ИСПРАВЛЕНО: UserSerializer теперь наследуется от BaseUserSerializer
+
 class UserSerializer(DjoserUserSerializer):
     avatar = Base64ImageField(required=False, allow_null=True)
     is_subscribed = serializers.SerializerMethodField()
@@ -221,7 +221,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         return False
 
     def _create_or_update_ingredients(self, recipe, ingredients_data):
-        # Исправлено: убраны квадратные скобки
         RecipeIngredient.objects.bulk_create(
             RecipeIngredient(
                 recipe=recipe,
